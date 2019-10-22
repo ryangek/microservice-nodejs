@@ -12,33 +12,78 @@ app.use(
 app.use(bodyParser.json());
 
 /* Functions */
+function responseJson(res, response) {
+  res.json({
+    status: response.status,
+    statusText: response.statusText,
+    data: response.data
+  });
+}
+function handleError(res, error) {
+  console.error(error);
+  let status = 500;
+  if (error.code === 'ECONNREFUSED') {
+    status = 404;
+  }
+  res.json({
+    status: status,
+    statusText: error.code,
+    data: error
+  });
+}
 function callAxios(req, res, next, server) {
   const reqUrl = `${server}${req.originalUrl.replace(req.baseUrl, '')}`;
+  const config = {};
   switch (req.method) {
     case 'GET':
-      axios.get(reqUrl).then(({ data }) => {
-        res.json(data);
-      }).catch(error => {
-        console.error(error);
-        res.end();
-      });
+      axios
+        .get(reqUrl, config)
+        .then(response => {
+          responseJson(res, response);
+        })
+        .catch(error => {
+          handleError(res, error);
+        });
       break;
     case 'POST':
-      axios.post(reqUrl, req.body).then(({ data }) => {
-        res.json(data);
-      }).catch(error => {
-        console.error(error);
-        res.end();
-      });
+      axios
+        .post(reqUrl, req.body, config)
+        .then(response => {
+          responseJson(res, response);
+        })
+        .catch(error => {
+          handleError(res, error);
+        });
       break;
     case 'PUT':
-      res.json({ status: 200, textStatus: 'OK' });
+      axios
+        .put(reqUrl, req.body, config)
+        .then(response => {
+          responseJson(res, response);
+        })
+        .catch(error => {
+          handleError(res, error);
+        });
     case 'PATCH':
-      res.json({ status: 200, textStatus: 'OK' });
+      axios
+        .patch(reqUrl, req.body, config)
+        .then(response => {
+          responseJson(res, response);
+        })
+        .catch(error => {
+          handleError(res, error);
+        });
     case 'DELETE':
-      res.json({ status: 200, textStatus: 'OK' });
+      axios
+        .delete(reqUrl, config)
+        .then(response => {
+          responseJson(res, response);
+        })
+        .catch(error => {
+          handleError(res, error);
+        });
     default:
-      res.json({ status: 200, textStatus: 'OK' });
+      res.json({ status: 403, statusText: 'Forbidden', data: req.method });
   }
 }
 /* Functions */
