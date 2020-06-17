@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 const PORT = 3001;
 
 /* Routes */
-app.get('/', function(req, res, next) {
+app.get('/users', function(req, res, next) {
   res.json([
     {
       id: 1,
